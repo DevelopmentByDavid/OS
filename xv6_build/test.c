@@ -1,8 +1,9 @@
-#include <stdio.h>
+#include "types.h"
+#include "user.h"
 
 
 int main(){
 
-printf ("%s \n", "A string");
-return 0;
+printf(1, "Hello World \n");
+exit(0);
 }
