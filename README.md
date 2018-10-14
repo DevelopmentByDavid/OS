@@ -1,5 +1,12 @@
 # CS153
-
+## Copy-Paste Bank
+``kill $(pgrep qemu)``  
+``find . -type f -name *.c -exec sed -i.bak 's|TOREPLACE|REPLACEWITH|g' {} +``     
+``find . -type f -name *.c | grep TOFIND ``    
+``echo "add-auto-load-safe-path $HOME/xv6/.gdbinit" > ~/.gdbinit``  
+``make qemu-nox-gdb``  
+``make qemu-ddb``  
+## Writing Test Files
 When writing user programs only use lib functions found in user.h and end the main function with an exit(status) instead of return as pictured
 
 ```C
