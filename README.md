@@ -27,8 +27,7 @@ int main(){
 ## Sed & Find basic usage
 [Sed detailed tutorial here](http://www.grymoire.com/Unix/Sed.html#uh-0)  
 [Sed basic stack overflow answer here](https://stackoverflow.com/questions/13364514/batch-replace-text-inside-text-file-linux-osx-commandline)   
-[decent find tutorial here; make sure to view -xargs vs -exec](https://danielmiessler.com/study/find/)  
-[find all occurences of x](https://stackoverflow.com/questions/16956810/how-do-i-find-all-files-containing-specific-text-on-linux)  
+[decent find tutorial here; make sure to view -xargs vs -exec](https://danielmiessler.com/study/find/)   
 
 Basic global read/write command for ease of copy-paste.  **CAPS = PLACEHOLDER**
 
@@ -39,5 +38,27 @@ Basic global read/write command for ease of copy-paste.  **CAPS = PLACEHOLDER**
 ``'s|TOREPLACE|REPLACEWITH|g'``: s = substitute g = global   
 
 
-Alternatively, to just find all occurences of something  
+Alternatively, to just find all occurences of something  [Source](https://stackoverflow.com/questions/16956810/how-do-i-find-all-files-containing-specific-text-on-linux)  
 ``grep -rnw '/path/to/somewhere/' -e 'pattern'``  
+* `-r` or `-R` is recursive, 
+* `-n` is line number, and 
+* `-w` stands for match the whole word. 
+* `-l` (lower-case L) can be added to just give the file name of matching files.
+
+Along with these, `--exclude`, `--include`, `--exclude-dir` flags could be used for efficient searching:
+
+  - This will only search through those files which have .c or .h extensions:
+
+        grep --include=\*.{c,h} -rnw '/path/to/somewhere/' -e "pattern"
+
+  - This will exclude searching all the files ending with .o extension:
+
+        grep --exclude=*.o -rnw '/path/to/somewhere/' -e "pattern"
+
+  -  For directories it's possible to exclude a particular directory(ies) through `--exclude-dir` parameter. For example, this will exclude the dirs dir1/, dir2/ and all of them matching *.dst/:
+
+        grep --exclude-dir={dir1,dir2,*.dst} -rnw '/path/to/somewhere/' -e "pattern"
+
+This works very well for me, to achieve almost the same purpose like yours.
+
+For more options check `man grep`.
