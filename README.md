@@ -17,8 +17,17 @@ int main(){
 
 [Adding a program to run in qemu shell](https://ampleux.wordpress.com/2018/02/22/how-to-add-a-user-program-to-xv6/)
 
-[Sed detailed tutorial here](http://www.grymoire.com/Unix/Sed.html#uh-0)
+## Sed & Find basic usage
+[Sed detailed tutorial here](http://www.grymoire.com/Unix/Sed.html#uh-0)  
+[Sed basic stack overflow answer here](https://stackoverflow.com/questions/13364514/batch-replace-text-inside-text-file-linux-osx-commandline)   
+[decent find tutorial here; make sure to view -xargs vs -exec](https://danielmiessler.com/study/find/)  
 
-[Sed basic stack overflow answer here](https://stackoverflow.com/questions/13364514/batch-replace-text-inside-text-file-linux-osx-commandline)
+Basic global read/write command for ease of copy-paste.  **CAPS = PLACEHOLDER**
 
-[decent find tutorial here; make sure to view -xargs vs -exec](https://danielmiessler.com/study/find/)
+``find . -type f -name *.c -exec sed -i.bak 's|TOREPLACE|REPLACEWITH|g' {} +``   
+``-type f`` : type of thing to find = file(s)  
+``-name *.c``:name of the file will be anything (because * matches anything b/c regex) ending with a .c extension  
+``-i.bak``: creates a backup file with the same name as the original
+``'s|TOREPLACE|REPLACEWITH|g'``: s = substitute g = global   
+Alternatively, to just find all occurences of something  
+``find . -type f -name *.c | grep TOFIND ``  
