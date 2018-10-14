@@ -29,5 +29,7 @@ Basic global read/write command for ease of copy-paste.  **CAPS = PLACEHOLDER**
 ``-name *.c``:name of the file will be anything (because * matches anything b/c regex) ending with a .c extension  
 ``-i.bak``: creates a backup file with the same name as the original   
 ``'s|TOREPLACE|REPLACEWITH|g'``: s = substitute g = global   
+
+
 Alternatively, to just find all occurences of something  
 ``find . -type f -name *.c | grep TOFIND ``  
