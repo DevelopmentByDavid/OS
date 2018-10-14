@@ -2,7 +2,7 @@
 ## Copy-Paste Bank
 ``kill $(pgrep qemu)``  
 ``find . -type f -name \*.c -exec sed -i.bak 's|TOREPLACE|REPLACEWITH|g' {} +``     
-``find . -type f -name \*.c | grep TOFIND ``    
+``grep -rnw '/path/to/somewhere/' -e 'pattern``  
 ``echo "add-auto-load-safe-path $HOME/xv6/.gdbinit" > ~/.gdbinit``  
 ``make qemu-nox-gdb``  
 ``make qemu-ddb``  
@@ -28,6 +28,7 @@ int main(){
 [Sed detailed tutorial here](http://www.grymoire.com/Unix/Sed.html#uh-0)  
 [Sed basic stack overflow answer here](https://stackoverflow.com/questions/13364514/batch-replace-text-inside-text-file-linux-osx-commandline)   
 [decent find tutorial here; make sure to view -xargs vs -exec](https://danielmiessler.com/study/find/)  
+[find all occurences of x](https://stackoverflow.com/questions/16956810/how-do-i-find-all-files-containing-specific-text-on-linux)  
 
 Basic global read/write command for ease of copy-paste.  **CAPS = PLACEHOLDER**
 
@@ -39,4 +40,4 @@ Basic global read/write command for ease of copy-paste.  **CAPS = PLACEHOLDER**
 
 
 Alternatively, to just find all occurences of something  
-``find . -type f -name \*.c | grep TOFIND ``  
+``grep -rnw '/path/to/somewhere/' -e 'pattern'``  
