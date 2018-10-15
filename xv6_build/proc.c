@@ -347,12 +347,12 @@ waitpid(int pid, char* status, int options)
           release(&ptable.lock);
 
           //Save process exit status if the status variable is not NULL !MODIFIED
-          if(status) 
+          if(status){ 
             *status = p->exitStatus;
 	  //!MODIFIED
-	  if(*status != 0)
-	    return -1; 
-	  
+	    if(*status != 0)
+	      return -1; 
+	   } 
           return cur_pid;
         }
       }
