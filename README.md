@@ -6,6 +6,14 @@
 ``echo "add-auto-load-safe-path $HOME/xv6/.gdbinit" > ~/.gdbinit``  
 ``make qemu-nox-gdb``  
 ``make qemu-ddb``  
+
+## Adding System Calls
+The prototypes for the user's system calls should appear in defs.h and user.h
+
+[Adding a basic system call](https://stackoverflow.com/questions/8021774/how-do-i-add-a-system-call-utility-in-xv6?rq=1)
+
+[Adding a system call with user passed parameters](https://stackoverflow.com/questions/46870509/how-to-pass-a-value-into-system-call-xv6)
+
 ## Writing Test Files
 When writing user programs only use lib functions found in user.h and end the main function with an exit(status) instead of return as pictured
 
