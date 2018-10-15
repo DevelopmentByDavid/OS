@@ -117,9 +117,11 @@ void            sched(void);
 void            setproc(struct proc*);
 void            sleep(void*, struct spinlock*);
 void            userinit(void);
-int             wait(int* status);
+int             wait(char* status);
 void            wakeup(void*);
 void            yield(void);
+//!MODIFIED
+int waitpid(int pid, char *status, int options);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

@@ -21,10 +21,21 @@ sys_exit(void)
 }
 
 int
-sys_wait(void)
+sys_wait(char* status)
 {
-  return wait(0);
+  argptr(0, &status, sizeof(char*));
+  return wait(status);
 }
+
+int 
+sys_waitpid(int pid, char* status, int options)
+{
+  argint(0,&pid);
+  argptr(1,&status,sizeof(char*));
+  argint(2,&options);
+  return waitpid(pid, status, options);
+}
+
 
 int
 sys_kill(void)
