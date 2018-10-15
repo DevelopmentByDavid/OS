@@ -274,7 +274,7 @@ exit(int status)
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
-wait(char* status)
+wait(int* status)
 {
   struct proc *p;
   int havekids, pid;
@@ -321,7 +321,7 @@ wait(char* status)
 }
 
 int
-waitpid(int pid, char* status, int options)
+waitpid(int pid, int* status, int options)
 {
   struct proc *p;
   int cur_pid;
