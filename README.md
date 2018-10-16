@@ -2,7 +2,7 @@
 ## Copy-Paste Bank
 ``kill $(pgrep qemu)``  
 ``find . -type f -name \*.c -exec sed -i.bak 's|TOREPLACE|REPLACEWITH|g' {} +``     
-``grep -rnw '/path/to/somewhere/' -e 'pattern``  
+``grep -rnw '/path/to/somewhere/' -e 'pattern'``  
 ``echo "add-auto-load-safe-path $HOME/xv6/.gdbinit" > ~/.gdbinit``  
 ``make qemu-nox-gdb``  
 ``make qemu-ddb``  
