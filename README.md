@@ -10,7 +10,7 @@
 ## Adding System Calls
 The prototypes for the user's system calls should appear in defs.h and user.h
 
-[Adding a basic system call](https://stackoverflow.com/questions/8021774/how-do-i-add-a-system-call-utility-in-xv6?rq=1)
+[Adding a basic system call](https://stackoverflow.com/a/13205101)
 
 [Adding a system call with user passed parameters](https://stackoverflow.com/questions/46870509/how-to-pass-a-value-into-system-call-xv6)
 
