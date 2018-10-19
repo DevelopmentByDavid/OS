@@ -1,0 +1,16 @@
+#include "types.h"
+#include "user.h"
+
+
+int main() {
+	int child_pid = fork();
+	if (child_pid == 0) {
+		printf(1, "I exit first!");
+	} else {
+		//some sort of waitpid here
+		Printf(1, "I exit second because I wait on first to exit!");
+		
+	}
+	//printf(1, "Hello World \n");
+	exit(0);
+}

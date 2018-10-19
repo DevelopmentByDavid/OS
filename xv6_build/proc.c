@@ -233,6 +233,8 @@ exit(int status)
   struct proc *p;
   int fd;
 
+
+  curproc->exitStatus = status;
   if(curproc == initproc)
     panic("init exiting");
 
@@ -254,8 +256,6 @@ exit(int status)
   // Parent might be sleeping in wait(status)
   wakeup1(curproc->parent);
   
-  //Assign an exit status to proccess
-  curproc->exitStatus = status;
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->parent == curproc){
