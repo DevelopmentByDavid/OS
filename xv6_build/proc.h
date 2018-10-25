@@ -52,6 +52,7 @@ struct proc {
 
   //!MODIFIED
   int exitStatus;
+  int priority;
 };
 
 // Process memory is laid out contiguously, low addresses first:

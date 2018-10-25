@@ -175,7 +175,23 @@ growproc(int n)
   switchuvm(curproc);
   return 0;
 }
-
+//Sets the process's priority
+//return -1 if pid doesnt exist
+int
+set_priority(int pid, int priority)
+{
+  struct proc *p;
+  int exists = 0;
+  acquire(&ptable.lock); 
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid){
+      p->priority = priority;
+      exists = 1;
+    }
+  }
+  release(&ptable.lock);
+  return (!exists) ? -1 : 1; 
+}
 // Create a new process copying p as the parent.
 // Sets up stack to return as if from system call.
 // Caller must set state of returned proc to RUNNABLE.
@@ -201,7 +217,8 @@ fork(void)
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
-
+  //!MODIFIED
+  //set_priority
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
