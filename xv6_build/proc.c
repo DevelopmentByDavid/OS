@@ -175,22 +175,16 @@ growproc(int n)
   switchuvm(curproc);
   return 0;
 }
-//Sets the process's priority
-//return -1 if pid doesnt exist
+//Sets the current process's priority
 int
-setpriority(int pid, int priority)
+setpriority(int priority)
 {
-  struct proc *p;
-  int exists = 0;
+  struct proc *p = myproc();
   acquire(&ptable.lock); 
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->pid == pid){
-      p->priority = priority;
-      exists = 1;
-    }
-  }
+  p->priority = priority;
+   
   release(&ptable.lock);
-  return (!exists) ? -1 : 1; 
+  return 0; 
 }
 // Create a new process copying p as the parent.
 // Sets up stack to return as if from system call.
