@@ -178,7 +178,7 @@ growproc(int n)
 //Sets the process's priority
 //return -1 if pid doesnt exist
 int
-set_priority(int pid, int priority)
+setpriority(int pid, int priority)
 {
   struct proc *p;
   int exists = 0;
@@ -218,7 +218,7 @@ fork(void)
   np->parent = curproc;
   *np->tf = *curproc->tf;
   //!MODIFIED
-  //set_priority
+  //setpriority
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
