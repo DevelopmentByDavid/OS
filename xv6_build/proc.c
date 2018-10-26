@@ -113,7 +113,7 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-
+  p->priority = 1; //!MODIFIED
   return p;
 }
 
@@ -397,6 +397,7 @@ void
 scheduler(void)
 {
   struct proc *p;
+  struct proc *schedp = 0;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -405,11 +406,16 @@ scheduler(void)
     sti();
 
     // Loop over process table looking for process to run.
+    // !MODIFIED changed the loop to look for highest priority and runs it out of the loop
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
-
+      if(!schedp || (p->priority <= schedp->priority)){
+        schedp = p;
+      }
+    }
+      p = schedp; // assign schedp to p to reduce modification to original code.
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -423,7 +429,7 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
-    }
+    
     release(&ptable.lock);
 
   }
