@@ -105,3 +105,12 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//!MODIFIED
+//this is the sys_setpriority implementation
+int
+sys_setpriority(int priority) 
+{
+    argint(0, &priority);
+    return setpriority(priority);
+}
