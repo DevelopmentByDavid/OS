@@ -5,7 +5,7 @@
 ``grep -rnw '/path/to/somewhere/' -e 'pattern'``  
 ``echo "add-auto-load-safe-path $HOME/xv6/.gdbinit" > ~/.gdbinit``  
 ``make qemu-nox-gdb``  
-``make qemu-ddb``  
+``make qemu-gdb``  
 
 ## Adding System Calls
 The prototypes for the user's system calls should appear in defs.h and user.h
@@ -70,3 +70,16 @@ Along with these, `--exclude`, `--include`, `--exclude-dir` flags could be used 
 This works very well for me, to achieve almost the same purpose like yours.
 
 For more options check `man grep`.
+
+## vim settings  
+in ~/.vimrc add... 
+````
+ 1 filetype plugin indent on
+  2 " show existing tab with 4 spaces width
+  3 set tabstop=4
+  4 " " when indenting with '>', use 4 spaces width
+  5 set shiftwidth=4
+  6 " " On pressing tab, insert 4 spaces
+  7 set expandtab
+  8 set number
+  ````
