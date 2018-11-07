@@ -7,7 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 
-
+#define QUEUE_SIZE 100
 
 struct {
   struct spinlock lock;
@@ -20,7 +20,7 @@ struct queue {
     struct el *tail;
 };
 
-static struct queue QUEUE[100] = {{0,0}};
+static struct queue QUEUE[QUEUE_SIZE] = {{0,0}};
 
 static struct proc *initproc;
 
@@ -75,6 +75,63 @@ myproc(void) {
   return p;
 }
 
+
+
+void queue_push(struct proc *proc, int index) {
+    //if queue is empty set head and tail to proc
+    //acquire(&ptable.lock);
+    if((QUEUE[index].head == 0) && (QUEUE[index].tail == 0)){
+        proc->el.prevEl = proc->el.nextEl = 0;
+        proc->el.proc = proc;
+        QUEUE[index].head = QUEUE[index].tail = &(proc->el);
+        //release(&ptable.lock);
+        return;
+    }
+    //change current tail to proc arg
+    QUEUE[index].tail->nextEl = &(proc->el);
+    //push proc arg onto queue
+    proc->el.proc = proc;
+    proc->el.nextEl = 0;
+    proc->el.prevEl = QUEUE[index].tail;
+    QUEUE[index].tail = &(proc->el);
+    //release(&ptable.lock);
+}
+
+//scheduler needs to push process back on if it is still runnable
+struct proc *queue_pop(int index) {
+    int i = 0;
+    for(;i < QUEUE_SIZE && QUEUE[i].head == 0; i++){
+
+    }
+
+    //unfinished processes are popped back after it switches back to scheduler
+    
+    /*QUEUE[i].tail->nextEl = QUEUE[i].head;
+    //change tail to current head
+    QUEUE[i].tail = QUEUE[i].head;
+    //change queue head to oldhead->nextEl
+    QUEUE[i].head = QUEUE[i].head->nextEl;
+    //change oldHead->nextEl to null
+    QUEUE[i].tail->nextEl = 0;
+    //change oldTail->nextEl to oldHead
+    //return oldHead->myProc
+    */
+    if(QUEUE[i].head == 0) return 0;
+    struct proc* p = QUEUE[i].head->proc;
+    QUEUE[i].head = QUEUE[i].head->nextEl;
+    return p;
+}
+
+void queue_promote_all() {
+    //promote all to first queue
+    //for(int i = 1; i < 100; i++) {
+        //not doing rn
+    //}
+}
+
+
+
+
 //PAGEBREAK: 32
 // Look in the process table for an UNUSED proc.
 // If found, change state to EMBRYO and initialize
@@ -122,6 +179,10 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
   p->priority = 1; //!MODIFIED
+  p->el.nextEl = 0;
+  p->el.prevEl = 0;
+  p->el.proc = p;
+  //queue_push(p, p->priority);
   return p;
 }
 
@@ -159,6 +220,7 @@ userinit(void)
   acquire(&ptable.lock);
 
   p->state = RUNNABLE;
+  queue_push(p, p->priority);
 
   release(&ptable.lock);
 }
@@ -188,10 +250,10 @@ int
 setpriority(int priority)
 {
   struct proc *p = myproc();
-  acquire(&ptable.lock); 
+  //acquire(&ptable.lock); 
   p->priority = priority;
    
-  release(&ptable.lock);
+  //release(&ptable.lock);
   return 0; 
 }
 // Create a new process copying p as the parent.
@@ -221,6 +283,7 @@ fork(void)
   *np->tf = *curproc->tf;
   //!MODIFIED
   //setpriority
+  np->priority = curproc->priority;
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
@@ -236,6 +299,7 @@ fork(void)
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
+  queue_push(np, np->priority);
 
   release(&ptable.lock);
 
@@ -399,7 +463,6 @@ void
 scheduler(void)
 {
   struct proc *p;
-  struct proc *schedp = 0;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -410,27 +473,22 @@ scheduler(void)
     // Loop over process table looking for process to run.
     // !MODIFIED changed the loop to look for highest priority and runs it out of the loop
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
-      if(!schedp || (p->priority <= schedp->priority)){
-        schedp = p;
-      }
-    }
-      p = schedp; // assign schedp to p to reduce modification to original code.
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+    
+    p = queue_pop(0); // assign schedp to p to reduce modification to original code.
+    // Switch to chosen process.  It is the process's job
+    // to release ptable.lock and then reacquire it
+    // before jumping back to us.
+    c->proc = p;
+    switchuvm(p);
+    p->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+    swtch(&(c->scheduler), p->context);
+    switchkvm();
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+    if(p->state == RUNNABLE) queue_push(p, p->priority);
+    // Process is done running for now.
+    // It should have changed its p->state before coming back.
+    c->proc = 0;
     
     release(&ptable.lock);
 
@@ -615,29 +673,3 @@ procdump(void)
   }
 }
 
-void queue_push(struct proc *proc, int index) {
-    //change current tail to proc arg
-    QUEUE[index].tail->nextEl = &(proc->el);
-    //push proc arg onto queue
-    QUEUE[index].tail = &(proc->el);
-}
-
-struct proc *queue_pop(int index) {
-    QUEUE[index].tail->nextEl = QUEUE[index].head;
-    //change tail to current head
-    QUEUE[index].tail = QUEUE[index].head;
-    //change queue head to oldhead->nextEl
-    QUEUE[index].head = QUEUE[index].head->nextEl;
-    //change oldHead->nextEl to null
-    QUEUE[index].tail->nextEl = 0;
-    //change oldTail->nextEl to oldHead
-    //return oldHead->myProc
-    return QUEUE[index].tail->proc;
-}
-
-void queue_promote_all() {
-    //promote all to first queue
-    //for(int i = 1; i < 100; i++) {
-        //not doing rn
-    //}
-}
