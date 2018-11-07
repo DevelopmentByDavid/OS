@@ -122,9 +122,9 @@ struct proc *queue_pop(int index) {
     //change oldTail->nextEl to oldHead
     //return oldHead->myProc
     */
-    if(QUEUE[index].head == 0) return 0;
-    struct proc* p = QUEUE[index].head->proc;
-    QUEUE[index].head = QUEUE[index].head->nextEl;
+    if(QUEUE[i].head == 0) return 0;
+    struct proc* p = QUEUE[i].head->proc;
+    QUEUE[i].head = QUEUE[i].head->nextEl;
     return p;
 }
 
