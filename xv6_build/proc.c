@@ -14,6 +14,14 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+//!MODIFIED
+struct queue {
+    struct el *head;
+    struct el *tail;
+};
+
+static struct queue QUEUE[100] = {{0,0}};
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -605,4 +613,31 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+void queue_push(struct proc *proc, int index) {
+    //change current tail to proc arg
+    QUEUE[index].tail->nextEl = &(proc->el);
+    //push proc arg onto queue
+    QUEUE[index].tail = &(proc->el);
+}
+
+struct proc *queue_pop(int index) {
+    QUEUE[index].tail->nextEl = QUEUE[index].head;
+    //change tail to current head
+    QUEUE[index].tail = QUEUE[index].head;
+    //change queue head to oldhead->nextEl
+    QUEUE[index].head = QUEUE[index].head->nextEl;
+    //change oldHead->nextEl to null
+    QUEUE[index].tail->nextEl = 0;
+    //change oldTail->nextEl to oldHead
+    //return oldHead->myProc
+    return QUEUE[index].tail->proc;
+}
+
+void queue_promote_all() {
+    //promote all to first queue
+    //for(int i = 1; i < 100; i++) {
+        //not doing rn
+    //}
 }
