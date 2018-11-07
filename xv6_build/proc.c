@@ -100,7 +100,7 @@ void queue_push(struct proc *proc, int index) {
 }
 
 //scheduler needs to push process back on if it is still runnable
-struct proc *queue_pop(int index) {
+struct proc *queue_pop() {
    int i = 0;
    for(;i < QUEUE_SIZE; i++){
        if (QUEUE[i].head == 0) {
@@ -111,21 +111,22 @@ struct proc *queue_pop(int index) {
    }
 
     //unfinished processes are popped back after it switches back to scheduler
-    
-    /*QUEUE[i].tail->nextEl = QUEUE[i].head;
+    //QUEUE[i].tail->nextEl = QUEUE[i].head;
     //change tail to current head
-    QUEUE[i].tail = QUEUE[i].head;
+    //QUEUE[i].tail = QUEUE[i].head;
     //change queue head to oldhead->nextEl
-    QUEUE[i].head = QUEUE[i].head->nextEl;
+    //QUEUE[i].head = QUEUE[i].head->nextEl;
     //change oldHead->nextEl to null
-    QUEUE[i].tail->nextEl = 0;
+    //QUEUE[i].tail->nextEl = 0;
     //change oldTail->nextEl to oldHead
-    //return oldHead->myProc
-    */
+    //return oldHead->myProc;
+    
     if(QUEUE[i].head == 0) return 0;
     struct proc* p = QUEUE[i].head->proc;
-    QUEUE[i].head = QUEUE[i].head->nextEl;
-    QUEUE[i].head->prevEl = 0;
+    if (QUEUE[i].head->nextEl != 0) {
+        QUEUE[i].head = QUEUE[i].head->nextEl;
+        QUEUE[i].head->prevEl = 0;
+    }
     return p;
 }
 
@@ -134,6 +135,10 @@ void queue_promote_all() {
     //for(int i = 1; i < 100; i++) {
         //not doing rn
     //}
+}
+
+struct el *getPrev(struct el *el) {
+    return el->prevEl;
 }
 struct el *getNext(struct el *el) {
     return el->nextEl;
@@ -529,7 +534,7 @@ scheduler(void)
     // !MODIFIED changed the loop to look for highest priority and runs it out of the loop
     acquire(&ptable.lock);
     
-    p = queue_pop(0); // assign schedp to p to reduce modification to original code.
+    p = queue_pop(); // assign schedp to p to reduce modification to original code.
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it
     // before jumping back to us.
