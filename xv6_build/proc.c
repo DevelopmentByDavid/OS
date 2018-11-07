@@ -80,6 +80,7 @@ myproc(void) {
 void queue_push(struct proc *proc, int index) {
     //if queue is empty set head and tail to proc
     //acquire(&ptable.lock);
+    
     if((QUEUE[index].head == 0) && (QUEUE[index].tail == 0)){
         proc->el.prevEl = proc->el.nextEl = 0;
         proc->el.proc = proc;
@@ -95,14 +96,19 @@ void queue_push(struct proc *proc, int index) {
     proc->el.prevEl = QUEUE[index].tail;
     QUEUE[index].tail = &(proc->el);
     //release(&ptable.lock);
+ 
 }
 
 //scheduler needs to push process back on if it is still runnable
 struct proc *queue_pop(int index) {
-    int i = 0;
-    for(;i < QUEUE_SIZE && QUEUE[i].head == 0; i++){
-
-    }
+   int i = 0;
+   for(;i < QUEUE_SIZE; i++){
+       if (QUEUE[i].head == 0) {
+           continue;
+       } else {
+            break;
+       }
+   }
 
     //unfinished processes are popped back after it switches back to scheduler
     
@@ -116,9 +122,9 @@ struct proc *queue_pop(int index) {
     //change oldTail->nextEl to oldHead
     //return oldHead->myProc
     */
-    if(QUEUE[i].head == 0) return 0;
-    struct proc* p = QUEUE[i].head->proc;
-    QUEUE[i].head = QUEUE[i].head->nextEl;
+    if(QUEUE[index].head == 0) return 0;
+    struct proc* p = QUEUE[index].head->proc;
+    QUEUE[index].head = QUEUE[index].head->nextEl;
     return p;
 }
 
@@ -478,6 +484,8 @@ scheduler(void)
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it
     // before jumping back to us.
+    //!MODIFIED
+    if (p != 0) {
     c->proc = p;
     switchuvm(p);
     p->state = RUNNING;
@@ -486,10 +494,11 @@ scheduler(void)
     switchkvm();
 
     if(p->state == RUNNABLE) queue_push(p, p->priority);
+    
     // Process is done running for now.
     // It should have changed its p->state before coming back.
     c->proc = 0;
-    
+    }
     release(&ptable.lock);
 
   }
