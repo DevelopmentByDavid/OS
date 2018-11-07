@@ -125,6 +125,7 @@ struct proc *queue_pop(int index) {
     if(QUEUE[i].head == 0) return 0;
     struct proc* p = QUEUE[i].head->proc;
     QUEUE[i].head = QUEUE[i].head->nextEl;
+    QUEUE[i].head->prevEl = 0;
     return p;
 }
 
@@ -134,8 +135,53 @@ void queue_promote_all() {
         //not doing rn
     //}
 }
+struct el *getNext(struct el *el) {
+    return el->nextEl;
+}
 
-
+void queue_search_and_destroy (struct proc *proc, int index) {
+    //don't care about efficiency atm, just getting to work
+    //plus efficiency here won't make the biggest deal in the world
+    //just looks nooby
+    int found = 0;
+    struct el *newTail;
+    struct el *currEl;
+    struct el *newHead = newTail = currEl = 0;
+    if (QUEUE[index].head->proc == proc) {
+        newHead = QUEUE[index].head->nextEl;
+        QUEUE[index].head->nextEl = 0;
+        QUEUE[index].head->prevEl = 0;
+        QUEUE[index].head->proc = 0;
+        QUEUE[index].head = newHead;
+        found = 1;
+        return;
+    } else if (QUEUE[index].tail->proc == proc) {
+       newTail = QUEUE[index].tail->prevEl;
+       QUEUE[index].tail->prevEl = 0;
+       QUEUE[index].tail->nextEl = 0;
+       QUEUE[index].tail->proc = 0;
+       QUEUE[index].tail = newTail;
+       found = 1;
+       return;
+    }
+    currEl = getNext(QUEUE[index].head);
+    while(!found) {
+        if (currEl->proc == proc) {
+            //great found it
+            currEl->prevEl->nextEl = currEl->nextEl;
+            currEl->nextEl->prevEl = currEl->prevEl;
+            currEl->prevEl = 0;
+            currEl->nextEl = 0;
+            currEl->proc = 0;
+            found = 1;
+            break;
+        }
+        if (currEl == QUEUE[index].tail) {
+            panic("Process does not exist in queue");
+            break;
+        }
+    }
+}
 
 
 //PAGEBREAK: 32
@@ -322,7 +368,6 @@ exit(int status)
   struct proc *p;
   int fd;
 
-
   curproc->exitStatus = status;
   if(curproc == initproc)
     panic("init exiting");
@@ -379,6 +424,10 @@ wait(int* status)
       havekids = 1;
       if(p->state == ZOMBIE){
         // Found one.
+
+        // !MODIFIED
+        //queue_search_and_destroy(p, p->priority);
+
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
@@ -485,19 +534,19 @@ scheduler(void)
     // to release ptable.lock and then reacquire it
     // before jumping back to us.
     //!MODIFIED
-    if (p != 0) {
-    c->proc = p;
-    switchuvm(p);
-    p->state = RUNNING;
+    if (p != 0 && p->state == RUNNABLE) {
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
 
-    swtch(&(c->scheduler), p->context);
-    switchkvm();
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
 
-    if(p->state == RUNNABLE) queue_push(p, p->priority);
+        if(p->state == RUNNABLE) queue_push(p, p->priority);
     
-    // Process is done running for now.
-    // It should have changed its p->state before coming back.
-    c->proc = 0;
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
     }
     release(&ptable.lock);
 
