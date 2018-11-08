@@ -592,6 +592,7 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
+  queue_push(myproc(), myproc()->priority);
   sched();
   release(&ptable.lock);
 }
@@ -646,11 +647,15 @@ sleep(void *chan, struct spinlock *lk)
 
   sched();
 
+
+  //maybe not needed
   //push proc back on queue after sleep if not woken by wakeup() i.e. after the sleep(int) syscall.
   //if(p->state == SLEEPING){
   //  p->state = RUNNABLE;
   //  queue_push(p, p->priority);
   //}
+  
+
   // Tidy up.
   p->chan = 0;
 
@@ -698,8 +703,10 @@ kill(int pid)
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING)
+      if(p->state == SLEEPING){
         p->state = RUNNABLE;
+        queue_push(p, p->priority);
+      }
       release(&ptable.lock);
       return 0;
     }
