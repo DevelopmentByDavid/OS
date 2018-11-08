@@ -80,7 +80,8 @@ myproc(void) {
 void queue_push(struct proc *proc, int index) {
     //if queue is empty set head and tail to proc
     //acquire(&ptable.lock);
-    
+    if(proc->state != RUNNABLE) return;
+
     if((QUEUE[index].head == 0) && (QUEUE[index].tail == 0)){
         proc->el.prevEl = proc->el.nextEl = 0;
         proc->el.proc = proc;
@@ -644,7 +645,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-
+  //queue_search_and_destroy(p, p->priority);
   sched();
 
 
