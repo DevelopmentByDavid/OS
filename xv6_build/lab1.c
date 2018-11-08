@@ -77,23 +77,23 @@ int waitPid(void){
       sleep(5);
       printf(1, "\n This is the parent: Now waiting for child with PID# %d\n",pid_a[3]);
       ret_pid = waitpid(pid_a[3], &exit_status, 0);
-      printf(1, "\n This is the partent: Child# %d has exited with status %d\n",ret_pid, exit_status);
+      printf(1, "\n This is the parent: Child# %d has exited with status %d\n",ret_pid, exit_status);
       sleep(5);
       printf(1, "\n This is the parent: Now waiting for child with PID# %d\n",pid_a[1]);
       ret_pid = waitpid(pid_a[1], &exit_status, 0);
-      printf(1, "\n This is the partent: Child# %d has exited with status %d\n",ret_pid, exit_status);
+      printf(1, "\n This is the parent: Child# %d has exited with status %d\n",ret_pid, exit_status);
       sleep(5);
       printf(1, "\n This is the parent: Now waiting for child with PID# %d\n",pid_a[2]);
       ret_pid = waitpid(pid_a[2], &exit_status, 0);
-      printf(1, "\n This is the partent: Child# %d has exited with status %d\n",ret_pid, exit_status);
+      printf(1, "\n This is the parent: Child# %d has exited with status %d\n",ret_pid, exit_status);
       sleep(5);
       printf(1, "\n This is the parent: Now waiting for child with PID# %d\n",pid_a[0]);
       ret_pid = waitpid(pid_a[0], &exit_status, 0);
-      printf(1, "\n This is the partent: Child# %d has exited with status %d\n",ret_pid, exit_status);
+      printf(1, "\n This is the parent: Child# %d has exited with status %d\n",ret_pid, exit_status);
       sleep(5);
       printf(1, "\n This is the parent: Now waiting for child with PID# %d\n",pid_a[4]);
       ret_pid = waitpid(pid_a[4], &exit_status, 0);
-      printf(1, "\n This is the partent: Child# %d has exited with status %d\n",ret_pid, exit_status);
+      printf(1, "\n This is the parent: Child# %d has exited with status %d\n",ret_pid, exit_status);
       
       return ret_pid;
   }

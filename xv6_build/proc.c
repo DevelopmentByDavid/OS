@@ -80,7 +80,7 @@ myproc(void) {
 void queue_push(struct proc *proc, int index) {
     //if queue is empty set head and tail to proc
     //acquire(&ptable.lock);
-    if(proc->state != RUNNABLE) return;
+    //if(proc->state != RUNNABLE) panic("what am i doing with my life");
 
     if((QUEUE[index].head == 0) && (QUEUE[index].tail == 0)){
         proc->el.prevEl = proc->el.nextEl = 0;
@@ -89,6 +89,7 @@ void queue_push(struct proc *proc, int index) {
         //release(&ptable.lock);
         return;
     }
+
     //change current tail to proc arg
     QUEUE[index].tail->nextEl = &(proc->el);
     //push proc arg onto queue
@@ -128,6 +129,8 @@ struct proc *queue_pop() {
     if (QUEUE[i].head->nextEl != 0) {
         QUEUE[i].head = QUEUE[i].head->nextEl;
         QUEUE[i].head->prevEl = 0;
+    } else {
+        QUEUE[i].head = QUEUE[i].tail = 0;
     }
     return p;
 }
@@ -140,59 +143,47 @@ void queue_promote_all() {
 }
 
 struct el *getPrev(struct el *el) {
-    if (el->nextEl != 0) return el->prevEl;
+    if (el->prevEl != 0) return el->prevEl;
     return 0;
 }
 struct el *getNext(struct el *el) {
-    if (el->prevEl != 0) return el->nextEl;
+    if (el->nextEl != 0) return el->nextEl;
     return 0;
 }
 
 void queue_search_and_destroy (struct proc *proc, int index) {
-    //don't care about efficiency atm, just getting to work
-    //plus efficiency here won't make the biggest deal in the world
-    //just looks nooby
-    int found = 0;
-    struct el *newTail;
-    struct el *currEl;
-    struct el *newHead = newTail = currEl = 0;
-
-    if (QUEUE[index].head->proc == proc) {
-        if (QUEUE[index].head->nextEl != 0) {
-           newHead = QUEUE[index].head->nextEl;
-        }
-        QUEUE[index].head->nextEl = 0;
-        QUEUE[index].head->prevEl = 0;
-        QUEUE[index].head->proc = 0;
-        if (newHead == 0) {
-            QUEUE[index].head = 0;
-        } else {
-            QUEUE[index].head = newHead;
-        }
-        found = 1;
-        return;
-    }
-
-    currEl = getNext(QUEUE[index].head);
-    if (currEl == 0) panic("Proc does not exist");
-
-    while(!found) {
-        if (currEl->proc == proc) {
-            //great found it
-            if (currEl->prevEl != 0 && currEl->nextEl != 0) {
-                currEl->prevEl->nextEl = currEl->nextEl;
-                currEl->nextEl->prevEl = currEl->prevEl;
+    struct el *toDelete = QUEUE[index].head;
+    if (toDelete == 0) return;
+    for (;;) {
+        if (toDelete->proc == proc) {
+            //if head is toDelete
+            if (QUEUE[index].head == toDelete) {
+                //if head is toDelete and there exists an element after it
+                if (toDelete->nextEl != 0) {
+                    QUEUE[index].head = toDelete->nextEl;
+                    toDelete->nextEl = 0;
+                    QUEUE[index].head->prevEl = 0;
+                    return;
+                } else { //if head is toDelete and there does not exist an el after it
+                    QUEUE[index].head = 0;
+                    QUEUE[index].tail = 0;
+                    return;
+                }
+            } else if (toDelete->nextEl != 0 && toDelete->prevEl != 0) { //if between el's
+                toDelete->prevEl->nextEl = toDelete->nextEl;
+                toDelete->nextEl->prevEl = toDelete->prevEl;
+                toDelete->prevEl = 0;
+                toDelete->nextEl = 0;
+                return;
+            } else if (toDelete == QUEUE[index].tail) { //if toDelete is the tail
+                toDelete->prevEl->nextEl = 0;
+                QUEUE[index].tail = toDelete->prevEl;
+                toDelete->prevEl = 0;
+                return;
             }
-            currEl->prevEl = 0;
-            currEl->nextEl = 0;
-            currEl->proc = 0;
-            found = 1;
-            break;
         }
-        if (currEl == QUEUE[index].tail) {
-            panic("Process does not exist in queue");
-            break;
-        }
+        toDelete = getNext(toDelete);
+        if (toDelete == 0) return;
     }
 }
 
@@ -489,7 +480,7 @@ waitpid(int pid, int* status, int options)
         if(p->state == ZOMBIE && p->pid == pid/* !MODIFIED added pid check*/){
           // Found one.
           //!MODIFIED
-          queue_search_and_destroy(p, p->priority);
+          //queue_search_and_destroy(p, p->priority);
 
           cur_pid = p->pid;
           kfree(p->kstack);
@@ -503,9 +494,9 @@ waitpid(int pid, int* status, int options)
           release(&ptable.lock);
 
           //Save process exit status if the status variable is not NULL !MODIFIED
-          if(status){ 
+          if(status) { 
             *status = p->exitStatus;
-	  //!MODIFIED
+	        //!MODIFIED
 	        if(*status != 0)
 	            return -1; 
 	      } 
@@ -514,8 +505,6 @@ waitpid(int pid, int* status, int options)
       }
     }
 	if(!exists) return -1;
-        
-
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
@@ -655,7 +644,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-  queue_search_and_destroy(p, p->priority);
+  //queue_search_and_destroy(p, p->priority);
   sched();
 
 
