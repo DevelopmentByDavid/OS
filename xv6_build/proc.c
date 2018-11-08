@@ -110,6 +110,7 @@ struct proc *queue_pop() {
             break;
        }
    }
+   if (i == QUEUE_SIZE) return 0;
 
     //unfinished processes are popped back after it switches back to scheduler
     //QUEUE[i].tail->nextEl = QUEUE[i].head;
@@ -139,10 +140,12 @@ void queue_promote_all() {
 }
 
 struct el *getPrev(struct el *el) {
-    return el->prevEl;
+    if (el->nextEl != 0) return el->prevEl;
+    return 0;
 }
 struct el *getNext(struct el *el) {
-    return el->nextEl;
+    if (el->prevEl != 0) return el->nextEl;
+    return 0;
 }
 
 void queue_search_and_destroy (struct proc *proc, int index) {
@@ -153,29 +156,33 @@ void queue_search_and_destroy (struct proc *proc, int index) {
     struct el *newTail;
     struct el *currEl;
     struct el *newHead = newTail = currEl = 0;
+
     if (QUEUE[index].head->proc == proc) {
-        newHead = QUEUE[index].head->nextEl;
+        if (QUEUE[index].head->nextEl != 0) {
+           newHead = QUEUE[index].head->nextEl;
+        }
         QUEUE[index].head->nextEl = 0;
         QUEUE[index].head->prevEl = 0;
         QUEUE[index].head->proc = 0;
-        QUEUE[index].head = newHead;
+        if (newHead == 0) {
+            QUEUE[index].head = 0;
+        } else {
+            QUEUE[index].head = newHead;
+        }
         found = 1;
         return;
-    } else if (QUEUE[index].tail->proc == proc) {
-       newTail = QUEUE[index].tail->prevEl;
-       QUEUE[index].tail->prevEl = 0;
-       QUEUE[index].tail->nextEl = 0;
-       QUEUE[index].tail->proc = 0;
-       QUEUE[index].tail = newTail;
-       found = 1;
-       return;
     }
+
     currEl = getNext(QUEUE[index].head);
+    if (currEl == 0) panic("Proc does not exist");
+
     while(!found) {
         if (currEl->proc == proc) {
             //great found it
-            currEl->prevEl->nextEl = currEl->nextEl;
-            currEl->nextEl->prevEl = currEl->prevEl;
+            if (currEl->prevEl != 0 && currEl->nextEl != 0) {
+                currEl->prevEl->nextEl = currEl->nextEl;
+                currEl->nextEl->prevEl = currEl->prevEl;
+            }
             currEl->prevEl = 0;
             currEl->nextEl = 0;
             currEl->proc = 0;
@@ -481,6 +488,9 @@ waitpid(int pid, int* status, int options)
         exists = 1;
         if(p->state == ZOMBIE && p->pid == pid/* !MODIFIED added pid check*/){
           // Found one.
+          //!MODIFIED
+          queue_search_and_destroy(p, p->priority);
+
           cur_pid = p->pid;
           kfree(p->kstack);
           p->kstack = 0;
@@ -645,7 +655,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-  //queue_search_and_destroy(p, p->priority);
+  queue_search_and_destroy(p, p->priority);
   sched();
 
 
