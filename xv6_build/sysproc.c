@@ -90,6 +90,7 @@ sys_sleep(void)
     sleep(&ticks, &tickslock);
   }
   release(&tickslock);
+ // queue_push(myproc(), myproc()->priority);
   return 0;
 }
 

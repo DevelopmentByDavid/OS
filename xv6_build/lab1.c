@@ -28,7 +28,7 @@ int exitWait(void) {
 	  int pid, ret_pid, exit_status;
        int i;
   // use this part to test exit(int status) and wait(int* status)
- 
+sleep(5); 
   printf(1, "\n  Step 1: testing exit(int status) and wait(int* status):\n");
 
   for (i = 0; i < 2; i++) {

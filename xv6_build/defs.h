@@ -123,7 +123,7 @@ void            yield(void);
 //!MODIFIED
 int waitpid(int pid, int *status, int options);
 int setpriority(int priority);
-
+void queue_push(struct proc *proc, int index); 
 // swtch.S
 void            swtch(struct context**, struct context*);
 

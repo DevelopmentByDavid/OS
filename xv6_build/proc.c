@@ -307,10 +307,12 @@ int
 setpriority(int priority)
 {
   struct proc *p = myproc();
-  //acquire(&ptable.lock); 
+  acquire(&ptable.lock);
+  queue_search_and_destroy(p, p->priority); 
   p->priority = priority;
+  queue_push(p, p->priority);
    
-  //release(&ptable.lock);
+  release(&ptable.lock);
   return 0; 
 }
 // Create a new process copying p as the parent.
@@ -493,9 +495,9 @@ waitpid(int pid, int* status, int options)
           if(status){ 
             *status = p->exitStatus;
 	  //!MODIFIED
-	    if(*status != 0)
-	      return -1; 
-	   } 
+	        if(*status != 0)
+	            return -1; 
+	      } 
           return cur_pid;
         }
       }
@@ -644,6 +646,11 @@ sleep(void *chan, struct spinlock *lk)
 
   sched();
 
+  //push proc back on queue after sleep if not woken by wakeup() i.e. after the sleep(int) syscall.
+  //if(p->state == SLEEPING){
+  //  p->state = RUNNABLE;
+  //  queue_push(p, p->priority);
+  //}
   // Tidy up.
   p->chan = 0;
 
@@ -663,8 +670,10 @@ wakeup1(void *chan)
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
+    if(p->state == SLEEPING && p->chan == chan){
       p->state = RUNNABLE;
+      queue_push(p, p->priority);
+    }
 }
 
 // Wake up all processes sleeping on chan.
