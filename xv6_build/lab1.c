@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 	int exitWait(void);
 	int waitPid(void);
 	int PScheduler(void);
-
+    int Inheritance(void);
   printf(1, "\n This program tests the correctness of your lab#1\n");
   
   if (atoi(argv[1]) == 1)
@@ -16,7 +16,8 @@ int main(int argc, char *argv[])
 	waitPid();
   else if (atoi(argv[1]) == 3)
 	PScheduler();
-  else 
+  else if (atoi(argv[1]) == 4)
+     Inheritance(); 
    printf(1, "\ntype \"lab1 1\" to test exit and wait, \"lab1 2\" to test waitpid and \"lab1 3\" to test the priority scheduler \n");
   
     // End of test
@@ -141,3 +142,35 @@ int waitPid(void){
 			
 	return ret_pid;
 }
+
+ int Inheritance(void){
+    int pid1, pid2;
+    int j,k;
+    printf(1, "This is the parent setting priority to 60 \n");
+    setpriority(60);
+    pid1 = fork();
+    if(pid1 == 0){
+        printf(1, "This is Child 1, I have inherited 60 \n");
+		for (j=0;j<50000;j++) {
+			for(k=0;k<10000;k++) {
+				asm("nop"); }}
+        printf(1, "Child 1 with priority 60 has finished \n");
+        exit(0);
+    }else{
+        printf(1, "This the parent, setting priority to 10 \n");
+        setpriority(10);
+        pid2 = fork();
+        if(pid2 == 0){
+            printf(1, "This is Child 2, I have inherited 10 \n");
+            for (j=0;j<50000;j++) {
+			    for(k=0;k<10000;k++) {
+				    asm("nop"); }}
+            printf(1, "Child 2 with priority 10 has finished \n");
+            exit(0);
+        }else{
+            waitpid(pid1,0,0);
+            waitpid(pid2,0,0);
+            return pid1;
+        }
+    }
+ }
