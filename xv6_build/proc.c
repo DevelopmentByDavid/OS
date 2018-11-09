@@ -80,7 +80,7 @@ myproc(void) {
 void queue_push(struct proc *proc, int index) {
     //if queue is empty set head and tail to proc
     //acquire(&ptable.lock);
-    //if(proc->state != RUNNABLE) panic("what am i doing with my life");
+    if(proc->state != RUNNABLE) return;
 
     if((QUEUE[index].head == 0) && (QUEUE[index].tail == 0)){
         proc->el.prevEl = proc->el.nextEl = 0;
@@ -133,13 +133,6 @@ struct proc *queue_pop() {
         QUEUE[i].head = QUEUE[i].tail = 0;
     }
     return p;
-}
-
-void queue_promote_all() {
-    //promote all to first queue
-    //for(int i = 1; i < 100; i++) {
-        //not doing rn
-    //}
 }
 
 struct el *getPrev(struct el *el) {
@@ -340,7 +333,6 @@ fork(void)
   np->parent = curproc;
   *np->tf = *curproc->tf;
   //!MODIFIED
-  //setpriority
   np->priority = curproc->priority;
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
