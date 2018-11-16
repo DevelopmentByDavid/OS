@@ -323,7 +323,7 @@ copyuvm(pde_t *pgdir, uint sz)
 
   if((d = setupkvm()) == 0)
     return 0;
-  for(i = 0; i < PGSIZE; i += PGSIZE){
+  for(i = 0; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *)i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
@@ -340,7 +340,7 @@ copyuvm(pde_t *pgdir, uint sz)
   }
 
 
-  for(i = STKBASE - p->numPages * PGSIZE + 4; i < STKBASE; i += PGSIZE){
+  for(i = (STKBASE - p->numPages * PGSIZE + 4); i < STKBASE; i += PGSIZE){
     if((pte = walkpgdir(pgdir, (void *)i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
