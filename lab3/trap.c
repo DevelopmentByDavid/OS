@@ -83,6 +83,7 @@ trap(struct trapframe *tf)
                STKBASE - ((myproc()->numPages + 1) * PGSIZE),
                STKBASE - ((myproc()->numPages) * PGSIZE));
       myproc()->numPages++;
+      break;
     }
   //PAGEBREAK: 13
   default:
