@@ -42,15 +42,16 @@ int shm_open(int id, char **pointer) {
 
     if (i == 64 && empty != -1) {               //intialize the page
         //set id to index
+        i = empty;
         shm_table.shm_pages[i].id = id;
         //allocate a page to the frame
-        shm_table.shm_pages[id].frame = kalloc();
+        shm_table.shm_pages[i].frame = kalloc();
         //set refcount to 1
-        shm_table.shm_pages[id].refcnt = 1;
+        shm_table.shm_pages[i].refcnt = 1;
 
         //do stuff now
         uint va = PGROUNDUP(p->sz);
-        mappages(p->pgdir, (char *)va, PGSIZE, V2P(shm_table.shm_pages[id].frame), PTE_W | PTE_U);
+        mappages(p->pgdir, (void *)va, PGSIZE, V2P(shm_table.shm_pages[id].frame), PTE_W | PTE_U);
         *pointer = (char *) va;
         release(&(shm_table.lock));
         return va;
@@ -59,7 +60,7 @@ int shm_open(int id, char **pointer) {
        uint va = PGROUNDUP(p->sz);
        //mappages
        mappages(p->pgdir,
-               va,
+               (void*)va,
                PGSIZE,
                V2P(shm_table.shm_pages[id].frame),
                PTE_W | PTE_U);
