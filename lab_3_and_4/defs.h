@@ -72,6 +72,10 @@ void            kinit2(void*, void*);
 // kbd.c
 void            kbdintr(void);
 
+//shm.c
+int shm_open(int id, char **pointer); 
+int shm_close(int id);
+
 // lapic.c
 void            cmostime(struct rtcdate *r);
 int             lapicid(void);

@@ -7,6 +7,19 @@
 #include "mmu.h"
 #include "proc.h"
 
+
+int sys_shm_open(int id, char **pointer){
+    argint(0, &id);
+    argptr(1, (char **) &pointer, sizeof(char*));
+    return shm_open(id, pointer);
+}
+
+int sys_shm_close(int id){
+    argint(0, &id);
+    return shm_close(id);
+}
+
+
 int
 sys_fork(void)
 {
