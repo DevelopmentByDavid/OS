@@ -31,10 +31,11 @@ void shminit() {
 int shm_open(int id, char **pointer) {
     //acquire lock here
     //scan for the id passed in
+    
+    acquire(&(shm_table.lock));
     int i = 0;
     int empty = -1;
     struct proc *p = myproc();
-    acquire(&(shm_table.lock));
     for (; i < 64; i++) {
         if (shm_table.shm_pages[i].id == id) break;
         if (shm_table.shm_pages[i].id == 0 && empty == -1) empty = i;
@@ -46,6 +47,7 @@ int shm_open(int id, char **pointer) {
         shm_table.shm_pages[i].id = id;
         //allocate a page to the frame
         shm_table.shm_pages[i].frame = kalloc();
+        memset(shm_table.shm_pages[i].frame, 0, PGSIZE);  
         //set refcount to 1
         shm_table.shm_pages[i].refcnt = 1;
 
@@ -76,8 +78,8 @@ int shm_open(int id, char **pointer) {
     } else {                                   //page not found and no empty pages
     
     //placeholder
-    release(&(shm_table.lock));
-    return 0;
+    //release(&(shm_table.lock));
+    //return 0;
     }
 
 
