@@ -31,27 +31,33 @@ void shminit() {
 int shm_open(int id, char **pointer) {
     //acquire lock here
     //scan for the id passed in
+    
+    acquire(&(shm_table.lock));
     int i = 0;
     int empty = -1;
     struct proc *p = myproc();
-    acquire(&(shm_table.lock));
     for (; i < 64; i++) {
         if (shm_table.shm_pages[i].id == id) break;
         if (shm_table.shm_pages[i].id == 0 && empty == -1) empty = i;
     }
 
-    if (i == 64 && empty != -1) {               //intialize the page
+    if (i >= 64 && empty != -1) {               //intialize the page
         //set id to index
         i = empty;
         shm_table.shm_pages[i].id = id;
         //allocate a page to the frame
         shm_table.shm_pages[i].frame = kalloc();
+        memset(shm_table.shm_pages[i].frame, 0, PGSIZE);  
         //set refcount to 1
         shm_table.shm_pages[i].refcnt = 1;
 
         //do stuff now
         uint va = PGROUNDUP(p->sz);
-        mappages(p->pgdir, (void *)va, PGSIZE, V2P(shm_table.shm_pages[id].frame), PTE_W | PTE_U);
+        mappages(p->pgdir, 
+                (void *)va, 
+                PGSIZE, 
+                V2P(shm_table.shm_pages[i].frame), 
+                PTE_W | PTE_U);
         *pointer = (char *) va;
         release(&(shm_table.lock));
         return va;
@@ -62,14 +68,18 @@ int shm_open(int id, char **pointer) {
        mappages(p->pgdir,
                (void*)va,
                PGSIZE,
-               V2P(shm_table.shm_pages[id].frame),
+               V2P(shm_table.shm_pages[i].frame),
                PTE_W | PTE_U);
        //pointer to pointer
        *pointer = (char *) va;
+       shm_table.shm_pages[i].refcnt++;
        release(&(shm_table.lock));
        return va;
     } else {                                   //page not found and no empty pages
-        
+    
+    //placeholder
+    //release(&(shm_table.lock));
+    //return 0;
     }
 
 
@@ -88,7 +98,7 @@ int shm_close(int id) {
     }
     
     if (i < 64) {
-        int temp = shm_table.shm_pages[i].refcnt--;
+        int temp = --shm_table.shm_pages[i].refcnt;
         if (temp == 0) {
             shm_table.shm_pages[i].frame = 0;
             shm_table.shm_pages[i].id = 0;
